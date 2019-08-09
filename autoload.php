@@ -7,23 +7,32 @@
  */
 
 $classes_autoload = array(     
-    'Thai\\Nasp\\' => '/src',
-    'Thai\\Nasp\\Foo\\' => '/src/foo'
+    'App\\' => '/app',
+    'Core\\' => '/core'
 );
 
 class Autoload 
 {
-    public $classes_autoload = [];
-    public $path;
+    private $classes_autoload = [];
+    private $path;
+    private static $singletonObject;
 
-    public function __construct ($classes_autoload = []) {
+    private function __construct ($classes_autoload) {
         $this->classes_autoload = $classes_autoload;
+    }
+
+    public static function instantiate ($classes_autoload) {
+        if (self::$singletonObject == null) {
+        self::$singletonObject = new Autoload($classes_autoload);
+        }
+        return self::$singletonObject;
     }
 
     public function isPSR_4 ($class) {
         foreach ($this->classes_autoload as $prefix => $src) {
             if (substr($class, 0, strlen($prefix)) === $prefix) {
                 $this->path = __DIR__ . $src . '/' . substr($class, strlen($prefix)) . '.php';
+                
                 return true;
             }
         }
@@ -38,7 +47,7 @@ class Autoload
         }
     }
 }
-$autoload = new Autoload($classes_autoload);
+$autoload = Autoload::instantiate($classes_autoload);
 
 spl_autoload_register(function ($class) use ($autoload) {
     $autoload->run($class);
