@@ -17,11 +17,13 @@ class Autoload
     private $path;
     private static $singletonObject;
 
-    private function __construct ($classes_autoload) {
+    private function __construct ($classes_autoload) 
+    {
         $this->classes_autoload = $classes_autoload;
     }
 
-    public static function instantiate ($classes_autoload) {
+    public static function instantiate ($classes_autoload) 
+    {
         if (self::$singletonObject == null) {
         self::$singletonObject = new Autoload($classes_autoload);
         }
@@ -29,7 +31,8 @@ class Autoload
     }
 
     public function isPSR_4 ($class) {
-        foreach ($this->classes_autoload as $prefix => $src) {
+        foreach ($this->classes_autoload as $prefix => $src) 
+        {
             if (substr($class, 0, strlen($prefix)) === $prefix) {
                 $this->path = __DIR__ . $src . '/' . substr($class, strlen($prefix)) . '.php';
                 
@@ -39,7 +42,8 @@ class Autoload
         return false;
     }
     
-    public function run ($class) {
+    public function run ($class) 
+    {
         if ($this->isPSR_4($class) == true) {
             if (file_exists ($this->path)) {
                 require $this->path;
@@ -49,6 +53,7 @@ class Autoload
 }
 $autoload = Autoload::instantiate($classes_autoload);
 
-spl_autoload_register(function ($class) use ($autoload) {
+spl_autoload_register(function ($class) use ($autoload) 
+{
     $autoload->run($class);
 });
