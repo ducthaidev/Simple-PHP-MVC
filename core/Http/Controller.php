@@ -1,2 +1,9 @@
 <?php
-namespace Core\Http;
+namespace Core\Http; 
+
+class Controller
+{
+    public function __contruct () {
+        
+    }
+}

@@ -6,4 +6,4 @@ Route::get('hello', function () {
 });
 Route::get('hello/thai', 'haha');
 Route::view('myview', 'webpage');
-// Route::get( 'xin-chao/{ten}/{namsinh}' ,'MyController@getxinchao');
+Route::get('hello/{ten}/nguyen/{dem}/{sn}', 'MyController@xinChao');

@@ -1,12 +1,12 @@
 <?php
 namespace Core\Http; 
-require_once __DIR__ . '/../../app/route.php';
 
-use Core\Http\Request;
+require_once __DIR__ . '/../../app/route.php';
 
 class Route 
 {
-    private static $uri = [];
+    // uri-> method-> have param? 1,0-> action -> params
+    private static $urls = [];
     private static $singletonRoute;
     private $request;
     private function __construct () 
@@ -29,39 +29,45 @@ class Route
 
     public function show () 
     {
-        $uri = $this->request->getUri();
-        $view_file = function () {
-            
-        };
-        $error_view_file = function () {
-            echo '404';
-        };
-        var_dump(self::$uri);
-        foreach (self::$uri as $key => $value) {
-            if (strcmp($key, $uri) == 0) {         
-                foreach ($value as $s_key => $s_value) {
-                    if (empty($s_value) == false) {
-                        if (is_callable($s_value)) {
-                            return call_user_func($s_value);
+        foreach (self::$urls as $url) {
+            if (strcmp($url['method'], 'get') == 0) {
+                if ($url['have_params']) {
+                    $request_exploding = explode('/', $this->request->getUri());
+                    $uri_exploding = explode('/', $url['uri']);
+                    for ($i = 0; $i < count($uri_exploding); $i++) {
+                        if (strcmp($request_exploding[$i], $uri_exploding[$i]) !== 0) {
+                            $url['params'][$i] = $request_exploding[$i];
                         }
                     }
-                }   
-                
-                // else return $view_file;
+                }
             }
         }
-        return call_user_func($error_view_file);
     }
 
-    static public function get ($uri, $action = null, $type = 'get') 
+    static public function get ($uri, $action = null, $method = 'get') 
     {
-        self::$uri['/' . $uri] = array($type => $action);
+        //have params
+        if (preg_match_all('/(?<=\{).+?(?=\})/', $uri, $array)) {
+            array_push(self::$urls, array('uri' => '/' . $uri,
+                                       'method' => 'get',
+                                  'have_params' => 1,
+                                       'action' => $action,
+                                       'params' => null));
+        }
+            
+        //don't have params
+        else {
+            array_push(self::$urls, array('uri' => '/' . $uri,
+                                       'method' => 'get',
+                                  'have_params' => 0,
+                                       'action' => $action,
+                                       'params' => null));
+        }
     }
 
     static public function view ($uri, $action = null, $type = 'view') 
     {
-        self::$uri['/' . $uri] = array($type => $action);
-        // require __DIR__ . '/../../app/views/' . $view_name . '.php';
+      
     }
 }
 
