@@ -30,21 +30,56 @@ class Route
     public function show () 
     {
         foreach (self::$urls as $url) {
+            // check method
             if (strcmp($url['method'], 'get') == 0) {
+                //check have params
                 if ($url['have_params']) {
+                    // check uri
+                    $matching_uri = true;
                     $request_exploding = explode('/', $this->request->getUri());
                     $uri_exploding = explode('/', $url['uri']);
-                    for ($i = 0; $i < count($uri_exploding); $i++) {
-                        if (strcmp($request_exploding[$i], $uri_exploding[$i]) !== 0) {
-                            $url['params'][$i] = $request_exploding[$i];
+                    $uri_exploding_amount = count($uri_exploding);
+                    $request_exploding_amount = count($request_exploding);
+                    //  matching amount elements of each arrays
+                    if ($request_exploding_amount == $uri_exploding_amount) {    
+                        $different_indexes = [];    
+                        for ($i = 0; $i < $uri_exploding_amount; $i++) {
+                            if (strcmp($request_exploding[$i], $uri_exploding[$i]) !== 0) {
+                                array_push($different_indexes, $i);
+                            }
                         }
-                    }
+                        for ($j = 0, $i = 0; $i < $uri_exploding_amount - count($different_indexes); $i++, $j++) {
+                            if ($i == 0) {
+                                array_splice($request_exploding, $different_indexes[$i], 1);
+                                array_splice($uri_exploding, $different_indexes[$i], 1);
+                            } else {
+                                array_splice($request_exploding, $different_indexes[$i]-$j, 1);    
+                                array_splice($uri_exploding, $different_indexes[$i]-$j, 1); 
+                            }
+                        }
+                        for ($i = 0; $i < count($uri_exploding); $i++) {
+                            // matching order of each arrays
+                            if (strcmp($request_exploding[$i], $uri_exploding[$i]) !== 0) {
+                                return $matching_uri = false;
+                            }
+                        }
+                        // true -> push params to self::url['params'] 
+                        for ($i = 0; $i < count($different_indexes); $i++) {
+                            array_push($url['params'], explode('/', $this->request->getUri())[$different_indexes[$i]]);
+                        }   
+                    } else return $matching_uri = false;            
                 }
             }
+            var_dump($url['uri']).PHP_EOL;
+            echo '-----------------------'.PHP_EOL;
+            var_dump($url['action']).PHP_EOL;
+            echo '-----------------------'.PHP_EOL;
+            var_dump($url['params']).PHP_EOL;
+            echo '-----------------------'.PHP_EOL;
         }
     }
 
-    static public function get ($uri, $action = null, $method = 'get') 
+    static public function get ($uri, $action = [], $method = 'get') 
     {
         //have params
         if (preg_match_all('/(?<=\{).+?(?=\})/', $uri, $array)) {
@@ -52,7 +87,7 @@ class Route
                                        'method' => 'get',
                                   'have_params' => 1,
                                        'action' => $action,
-                                       'params' => null));
+                                       'params' => []));
         }
             
         //don't have params
@@ -61,11 +96,11 @@ class Route
                                        'method' => 'get',
                                   'have_params' => 0,
                                        'action' => $action,
-                                       'params' => null));
+                                       'params' => []));
         }
     }
 
-    static public function view ($uri, $action = null, $type = 'view') 
+    static public function view ($uri, $action = [], $type = 'view') 
     {
       
     }
