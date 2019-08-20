@@ -78,8 +78,7 @@ class Route
                             $controller_class = 'App\Controllers\\' . $action_controller[0];
                             $controller = new $controller_class();
                             call_user_func_array(array($controller, $action_controller[1]), $url['params']);
-                        } else return call_user_func($notiError);
-                        
+                        } else return call_user_func($notiError);   
                     } else return call_user_func($notiError);     
                 }
             }
