@@ -29,6 +29,10 @@ class Route
 
     public function show () 
     {
+        $notiError = function () {
+            echo '404';
+        }
+        //check url
         foreach (self::$urls as $url) {
             // check method
             if (strcmp($url['method'], 'get') == 0) {
@@ -67,15 +71,18 @@ class Route
                         for ($i = 0; $i < count($different_indexes); $i++) {
                             array_push($url['params'], explode('/', $this->request->getUri())[$different_indexes[$i]]);
                         }   
-                    } else return $matching_uri = false;            
+                        // get controller and call action with params
+                        if ($matching_uri) {
+                            $action_controller = preg_split('/@/', $url['action']);
+                            require __DIR__ . '/../../app/controllers/' . $action_controller[0] .'.php';
+                            $controller_class = 'App\Controllers\\' . $action_controller[0];
+                            $controller = new $controller_class();
+                            call_user_func_array(array($controller, $action_controller[1]), $url['params']);
+                        } else return call_user_func($notiError);
+                        
+                    } else return call_user_func($notiError);     
                 }
             }
-            var_dump($url['uri']).PHP_EOL;
-            echo '-----------------------'.PHP_EOL;
-            var_dump($url['action']).PHP_EOL;
-            echo '-----------------------'.PHP_EOL;
-            var_dump($url['params']).PHP_EOL;
-            echo '-----------------------'.PHP_EOL;
         }
     }
 

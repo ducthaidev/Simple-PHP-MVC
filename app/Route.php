@@ -1,6 +1,6 @@
 <?php
 use Core\Http\Route;
-
+//params in Route class must be correct order with params in Controller class
 Route::get('hello', function () {
     echo 'hellauuuuuuu';
 });
